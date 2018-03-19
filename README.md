@@ -1,1 +1,1 @@
-(http://bradcross1998.github.io)[Go to website]
+[Go to website](http://bradcross1998.github.io)
