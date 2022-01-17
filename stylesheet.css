@@ -1,0 +1,143 @@
+body
+{
+	background-color: rgba(249, 157, 0, 0.3);
+	margin-top: -1px;
+	margin-bottom: 0px;
+}
+.center
+{
+	border: 2px solid;
+	border-color: #9c8a6a;
+	width: 50%;
+	margin-top: -2px;
+	top: 0px;
+	margin-left: auto;
+	margin-right: auto;
+	left: 25%;
+	right: 25%;
+	height: 100%;
+	background-color: #ffffff;
+	color: #000000;
+	text-align: center;
+}
+.title a
+{
+	color: rgb(100,140,110);
+	text-decoration: none;
+}
+.footer a:hover
+{
+	color: #ff69b4;
+}
+.footer a
+{
+	color: rgb(100,110,140);
+	text-decoration: none;
+}
+.footer img
+{
+	border: 1px solid;
+}
+.footer
+{
+	margin-top: 20px;
+	border: 2px solid green;
+	background-color: black;
+	text-align: center;
+}
+.title
+{
+	margin-top: 10px;
+	margin-bottom: 7px;
+	font-size: 33px;
+	text-align: center;
+	font-family: "Serif";
+}
+.navbar a:hover
+{
+	color: #006400;
+}
+.navbar a
+{
+	color: rgb(100,110,140);
+	text-decoration: none;
+	margin-right: 1%;
+}
+.navbar
+{
+	margin-left: auto;
+	margin-right: auto;
+	border-top: solid 1px #eaeaea;
+	border-bottom: solid 1px #eaeaea;
+	background-color: #fbfbfb;
+	text-align: center;
+	font-family: "Serif";
+	width: 80%;
+	margin-bottom: 7px;
+}
+.about_me h1
+{
+	font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+}
+hr
+{
+	width: 80%
+}
+.about_me ul
+{
+	text-align: center;
+	list-style-position: inside;
+	list-style: none;
+	margin-left: 0px;
+	padding-left: 0px;
+}
+.about_me li
+{
+	padding-left: 1cj;
+	text-indent: -2ch;
+}
+.about_me li:before
+{
+	content: "☆";
+	padding-right: 5px;
+}
+.about_me img
+{
+	width: 20%;
+}
+@media all and (orientation:portrait) and (max-device-width: 600px) 
+{
+ 	.center
+ 	{
+ 		border: 2px solid;
+		border-color: #9c8a6a;
+		width: 70%;
+		margin-top: -2px;
+		top: 0px;
+		margin-left: auto;
+		margin-right: auto;
+		left: 15%;
+		right: 15%;
+		height: 100%;
+		background-color: #ffffff;
+		color: #000000;
+ 	}
+}
+@media all and (orientation:landscape) and (max-device-width: 600px) 
+{
+ 	.center
+ 	{
+ 		border: 2px solid;
+		border-color: #9c8a6a;
+		width: 80%;
+		margin-top: -2px;
+		top: 0px;
+		margin-left: auto;
+		margin-right: auto;
+		left: 10%;
+		right: 10%;
+		height: 100%;
+		background-color: #ffffff;
+		color: #000000;
+ 	}
+}
