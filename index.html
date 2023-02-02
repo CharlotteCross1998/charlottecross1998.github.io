@@ -1,0 +1,513 @@
+
+<!-- NOTE: Keep on top of accessibility, keep on top of neofetch with libraries -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Charlotte's Github Page</title>
+    <meta name="description" content="Charlotte's Personal Github Page">
+    <meta name="author" content="charlottecross1998">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link href="https://fonts.cdnfonts.com/css/segoe-ui-4" rel="stylesheet" >
+    <link href='https://fonts.googleapis.com/css?family=Roboto Mono' rel='stylesheet' >
+    <link rel="stylesheet" href="stylesheet.css" >
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.min.js" ></script>
+    <script>
+        class Ball
+    	    {
+                constructor(x, y)
+                {
+                    this.x = x;
+                    this.y = y;
+                    this.velX = random(-1, 1);
+                    this.velY = random(-1, 1);
+                    this.sWeight = random(1.5, 5);
+                }
+                Render()
+                {
+                    stroke(255);
+                    strokeWeight(this.sWeight);
+                    point(this.x, this.y);
+                }
+                Update()
+                {
+                    this.x += this.velX;
+                    this.y += this.velY;
+                    if(this.x <= 0 || this.x >= width)  this.velX = -this.velX;
+                    if(this.y <= 0 || this.y >= height) this.velY = -this.velY;
+                    var closest, secondClosest, closestDist = 9999, secondClosestDist = 9999;
+                    for(let ball of balls)
+                    {
+                        if(ball == this) continue; //don't check ourselves
+                        let d = dist(this.x, this.y, ball.x, ball.y);
+                        if(d < closestDist) { closestDist = d; closest = ball; }
+                        else if(d < secondClosestDist) { secondClosestDist = d; secondClosest = ball; }
+                    }
+                    if(secondClosestDist < 100) //Do this so we arent making triangles everywhere, just the close ones
+                                                //Furthermore, we check the 2nd one, because if the 2nd one is close the first one is too.
+                    {
+                        // stroke(0, 0, 0, 50);
+                        strokeWeight(2);
+                        fill(61, 61, 61);
+                        triangle(this.x, this.y, closest.x, closest.y, secondClosest.x, secondClosest.y);
+                    }
+                }
+    	    }
+    	    
+            var width, height;
+
+    	    var balls = [];
+    	    
+    	    function setup() 
+    	    {
+                width = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth, document.body.offsetWidth, document.documentElement.offsetWidth, document.documentElement.clientWidth);
+                height = window.innerHeight - document.querySelector('.navbar').getBoundingClientRect().height; //make height the height of the window (minus toolbars, address bars etc.) - height of navbar
+                var canvas = createCanvas(width, height);
+                console.log(width, height);
+                canvas.parent('p5-canvas');
+                for(let i = 0; i < 100; ++i)
+                {
+                    balls.push(new Ball(random(width), random(height)));    
+                }
+                cursor('cursor.cur');
+                canvas.canvas.oncontextmenu = () => false; //remove right click
+    	    }
+    	    function windowResized()
+            {
+                width = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth, document.body.offsetWidth, document.documentElement.offsetWidth, document.documentElement.clientWidth);
+                width = windowWidth;
+                height = window.innerHeight - document.querySelector('.navbar').getBoundingClientRect().height; //make height the height of the window (minus toolbars, address bars etc.) - height of navbar
+                resizeCanvas(width, height);
+            }
+            const MAX_TRAIL_COUNT = 30;
+            var colorScheme = ["#0A1B28", "#071F43", "#357D7E", "#35EEEE", "#919DF0"];
+            var trail = [];
+            var particles = [];
+            function Particle(x, y, vx, vy) 
+            {   
+                this.pos = new p5.Vector(x, y);
+                this.vel = new p5.Vector(vx, vy);
+                this.vel.mult(random(10));
+                this.vel.rotate(radians(random(-25, 25)));
+                this.mass = random(1, 30);
+                this.airDrag = random(0.92, 0.98);
+                this.colorIndex = int(random(colorScheme.length));
+                this.life = 0;
+                this.lifeSteps = random(-1, 1);
+                
+                this.move = function() {
+                    this.pos.rotate(radians(this.life * 0.002));
+                    this.vel.mult(this.airDrag);
+                    this.pos.add(this.vel);
+                    this.life += this.lifeSteps;
+                }
+            }
+    	    function draw() 
+    	    {
+                blendMode(BLEND);
+                background(20, 19, 33);
+                for(let ball of balls)
+                {
+                    ball.Render();
+                    ball.Update();
+                }
+                fill(255);
+                noStroke();
+                textSize(24);
+                text("Charlotte", (width/2) - (textWidth("Charlotte") / 2), height/2);
+                //console.log(balls[0]);
+            	blendMode(SCREEN);
+                trail.push([mouseX, mouseY]);
+
+                push();
+                let removeCount = 1;
+                if (mouseIsPressed && mouseButton == CENTER) {
+                    removeCount++;
+                }
+                
+                for (let i = 0; i < removeCount; i++) {
+                    if (trail.length == 0) {
+                        break;
+                    }
+                    
+                    if (mouseIsPressed || trail.length > MAX_TRAIL_COUNT) {
+                        trail.splice(0, 1);
+                    }
+                }
+                
+                // Spawn particles.
+                if (trail.length > 1) {
+                    let mouse = new p5.Vector(mouseX, mouseY);
+                    mouse.sub(pmouseX, pmouseY);
+                    if (mouse.mag() > 5) {
+                        mouse.normalize();
+                        for (let i = 0; i < 3; i++) {
+                            particles.push(new Particle(pmouseX, pmouseY, mouse.x, mouse.y));
+                        }
+                    }
+                }
+                
+                // Move and kill particles.
+                for (let i = particles.length - 1; i > -1; i--) {
+                    particles[i].move();
+                    if (particles[i].vel.mag() < 0.1) {
+                        particles.splice(i, 1);
+                    }
+                }
+                
+                // Draw trail.
+                drawingContext.shadowColor = color(0, 125, 255);
+
+                for (let i = 0; i < trail.length; i++) {
+                    let mass = i * 1.5;
+                    drawingContext.shadowBlur = mass;
+
+                    stroke(0);
+                    strokeWeight(mass);
+                    point(trail[i][0], trail[i][1]);
+                }
+                
+                // Draw particles.
+                for (let i = 0; i < particles.length; i++) {
+                    let p = particles[i];
+                    let mass = p.mass * p.vel.mag() * 0.6;
+
+                    drawingContext.shadowColor = color(colorScheme[p.colorIndex]);
+                    drawingContext.shadowBlur = mass;
+
+                    stroke(0);
+                    strokeWeight(mass);
+                    point(p.pos.x, p.pos.y);
+
+                    stroke(255);
+                    strokeWeight(mass * 0.05);
+                    point(p.pos.x, p.pos.y);
+                }
+                pop();
+    	    }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    <script>
+        $(function() 
+        {
+            $('#navbar-home').hover(function() 
+            {
+                $('#navbar-home').css('color', '#fff');
+                //$('#navbar-credits').css('color', '#aaa')
+                $('#navbar-credits').animate({color: '#aaaaaa'},300);
+                $('#navbar-about').animate({color: '#aaaaaa'},300);
+            }, function() 
+            {
+                // on mouseout, reset the background colour
+                $('#navbar-credits').css('color', '#fff');
+                $('#navbar-about').css('color', '#fff');
+            });
+            $('#navbar-about').hover(function() 
+            {
+                $('#navbar-about').css('color', '#fff');
+                $('#navbar-home').animate({color: '#aaaaaa'},300);
+                $('#navbar-credits').animate({color: '#aaaaaa'},300);
+            }, function() 
+            {
+                // on mouseout, reset the background colour
+                $('#navbar-home').css('color', '#fff');
+                $('#navbar-credits').css('color', '#fff');
+            });
+            $('#navbar-credits').hover(function() 
+            {
+                $('#navbar-credits').css('color', '#fff');
+                $('#navbar-home').animate({color: '#aaaaaa'},300);
+                $('#navbar-about').animate({color: '#aaaaaa'},300);
+            }, function() 
+            {
+                // on mouseout, reset the background colour
+                $('#navbar-home').css('color', '#fff');
+                $('#navbar-about').css('color', '#fff');
+            });
+        });
+        //Smooth scroll from https://www.w3schools.com/howto/howto_css_smooth_scroll.asp
+        $(document).ready(function()
+        {
+          // Add smooth scrolling to all links
+          $("a").on('click', function(event) 
+          {
+            // Make sure this.hash has a value before overriding default behavior
+            if (this.hash !== "") {
+              // Prevent default anchor click behavior
+              event.preventDefault();
+              // Store hash
+              var hash = this.hash;
+              // Using jQuery's animate() method to add smooth page scroll
+              // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area
+              $('html, body').animate(
+              {
+                scrollTop: $(hash).offset().top
+              }, 800, function()
+              {
+                // Add hash (#) to URL when done scrolling (default click behavior)
+                window.location.hash = hash;
+              });
+            } // End if
+          });
+
+            //Toggle styling
+            var styled = false;
+            var stylesheets = Array.from($("head").children('link[rel="stylesheet"]'));
+            $("#toggle-styling").click(function()
+            {
+                console.log("Toggling styles. Style state: " + styled);
+                styled = !styled;
+                if(styled) 
+                {  
+                    stylesheets.forEach(element => {
+                        element.disabled = true;
+                    });
+                }
+                else
+                {
+                    stylesheets.forEach(element => {
+                        element.disabled = false;
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div id="top" aria-label="This website is still in development, if there are any accessibility issues please let me know."></div>
+    <div class="navbar">
+        <div class="navbar-left">
+            Charlotte
+        </div>
+        <div class="navbar-center">
+            <a id="navbar-home" href="#home-title" aria-label="home link">00<br aria-hidden="true">// Home</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a id="navbar-about" href="#about-title" aria-label="about link">01<br aria-hidden="true">// About</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a id="navbar-credits" href="#credits-title" aria-label="credits link">02<br aria-hidden="true">// Credits</a>&nbsp;&nbsp;&nbsp;&nbsp;
+        </div>
+    </div>
+    <div id="p5-canvas" aria-hidden="true"></div>
+    <div id="home-title"><main><heading aria-label="home">// Home</heading></main></div>
+    <div class="mainbody">
+    	<div class="row">
+	        <div class="terminal column" aria-hidden="true"> 
+                <div style="border:1px solid white; border-bottom: 0;">
+                    <span style="color:#1793d1;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="font-weight:bold;color:#1793d1;">charlotte</span><span style="color:#ffffff">@</span><span style="font-weight:bold;color:#1793d1;">charlotte-website</span><br aria-hidden="true">
+                    <span style="color:#1793d1;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:#ffffff">-----------------------------------------------</span><br aria-hidden="true">
+                    <span style="color:#1793d1;">&nbsp;&nbsp;&nbsp;&nbsp;/\&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="font-weight:bold;color:#1793d1;">OS</span><span style="color:#ffffff">: Linux</span><br aria-hidden="true">
+                    <span style="color:#1793d1;">&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="font-weight:bold;color:#1793d1;">Host</span><span style="color:#ffffff">: charlottecross1998.github.io</span><br aria-hidden="true">
+                    <span style="color:#1793d1;">&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;,&nbsp;,&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="font-weight:bold;color:#1793d1;">Packages</span><span style="color:#ffffff">: 3 (javascript) 2 (css)</span><br aria-hidden="true">
+                    <span style="color:#1793d1;">&nbsp;/&nbsp;&nbsp;&nbsp;|&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;-\&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="font-weight:bold;color:#1793d1;">WM</span><span style="color:#ffffff">: CSS</span><br aria-hidden="true">
+                    <span style="color:#1793d1;">/_-''&nbsp;&nbsp;&nbsp;&nbsp;''-_\&nbsp;&nbsp;&nbsp;</span><span style="font-weight:bold;color:#1793d1;">WM Theme</span><span style="color:#ffffff">: Custom</span><br aria-hidden="true">
+                </div>
+                <div id="about-you" style="border: 1px solid white;"></div>
+                <script>
+                    var div = document.getElementById("about-you");
+                    div.innerHTML += "<h3 style=\"color: white; text-align:center;\">About You</h3><hr>"
+                    div.innerHTML += "<span style=\"font-weight: bold;\">Resolution (Screen): </span>" + window.screen.width + "x" + window.screen.height;
+                    div.innerHTML += "<br aria-hidden=\"true\"><span style=\"font-weight: bold;\">Resolution (Page): </span>" + window.innerWidth + "x" + window.innerHeight;
+                    div.innerHTML += "<br aria-hidden=\"true\"><span style=\"font-weight: bold;\">User-Agent: </span>" + window.navigator.userAgent;
+                    div.innerHTML += "<br aria-hidden=\"true\"><span style=\"font-weight: bold;\">Referrer: </span>" + document.referrer;
+                </script>
+            </div>
+		    <div class="github-readme-stats column" >
+		    	<img src="https://github-readme-stats.vercel.app/api?username=charlottecross1998&count_private=true&show_icons=true&theme=radical&hide_border=true" alt="Image showing my github stats, including stars earned, total commits for the year, pull requests, issues opened and how many repos I've contributed to. This image is dynamically made so unfortunately I cannot alt-text the numbers"/><br aria-hidden="true">
+		    	<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=charlottecross1998&theme=radical&hide_border=true" alt="Image showing my github most used languages. This image is dynamically made so unfortunately I cannot alt-text the languages. They tend to be python, c sharp, c plus plus, c and CSS"/>
+		    </div>
+		    <div class="column github-stats">
+		    	<div class="github-top-repos" itemscope itemtype="https://schema.org/Organization"><h2>GitHub Top Repos</h2"><br aria-hidden="true"><br aria-hidden="true"></div>
+                <script>
+                    $.getJSON('https://api.github.com/users/charlottecross1998/repos', function(data)
+                    {
+                        var repos = [];
+                        //Chrome and Firefox use sort differently, so check browser to determine which sorting alg to use
+                        var isFirefox = typeof InstallTrigger !== 'undefined';
+                        var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+                        var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+                        var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+                        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+                        var isEdge = !isIE && !!window.StyleMedia;
+                        var isBlink = (isChrome || isOpera) && !!window.CSS;
+                        if(!isFirefox && !isChrome && !isOpera) 
+                        { 
+                            //document.getElementsByClassName('github-top-repos')[0].innerHTML += "<hr><p style=\"font-size: 0.8em\">Note: You are using an unsupported browser. The sort function works differently depeding on what browser you're using, so this part of the page may not work for you. Supported browsers are Chrome, Firefox and Opera.<br aria-hidden=\"true\"></p>";
+                            console.info("[INFO] Unsupported browser is being used. Sort function may not work.");
+                            console.info("[INFO] Browser appears to be " + String(isSafari ? "Safari" : (isIE ? "Internet Explorer" : (isEdge) ? "Edge" : (isBlink) ? "Whatever blink is": "Unknown")));
+                        }
+                        //Get all the repos and sort them by stars
+                        data.forEach(repo => {
+                            if(repo.fork == false) repos.push(repo);
+                            repos = repos.sort((a, b) => {
+                                if(isChrome || isOpera) { if(a.stargazers_count > b.stargazers_count) return -1; }
+                                else if(isFirefox) { return a.stargazers_count < b.stargazers_count; }
+                                else 
+                                {
+                                    //Fuck knows, just use the chrome/opera one since it's probably gonna be webkit based
+                                    if(a.stargazers_count > b.stargazers_count) return -1;
+                                }
+                            })
+                        });
+                        //Remove them all except for the last 5
+                        let index = repos.length;
+                        while(index > 5) {
+                            repos.pop();
+                            --index;
+                        }
+                        //Put repos into html
+                        /*
+                            Name (bolded) - ★ (number) (<br aria-hidden="true">)
+                            Description
+                        */
+                       console.log(repos);
+                        repos.forEach(repo => {
+                            document.getElementsByClassName('github-top-repos')[0].innerHTML += "<hr><a target=\"_blank\" itemprop=\"url\" href=\"" + repo.html_url + "\"><b>" + repo.name + "</b> - ★ " + repo.stargazers_count + "</a><br aria-hidden=\"true\">" + repo.description + "<br aria-hidden=\"true\">";
+                        });
+                        document.getElementsByClassName('github-top-repos')[0].innerHTML += "<hr>"; //just to finish it off.
+                    });
+                </script>
+		    </div>
+	    </div>
+    </div>
+    <div id="about-title"><heading aria-label="about">// About</heading></div>
+	<div class="mainbody">
+		<div class="row about-me-div">
+			<!-- <div class="column"> -->
+                <div class="about-me about-me-left">
+                    <code style="color: rgba(255, 255, 255, 0.5);" aria-hidden="true">&lt;h3&gt;</code>
+                        <pre class="makemeabar">    Hi. I'm Charlotte<br aria-hidden="true">    I love animals, especially cats!</pre>
+                    <code style="color: rgba(255, 255, 255, 0.5);" aria-hidden="true">&lt;/h3&gt;</code>
+                </div>
+    		<!-- </div> -->
+            <!-- <div class="column"> -->
+                <div class="about-me about-me-center">
+                    <code style="color: rgba(255, 255, 255, 0.5);" aria-hidden="true">&lt;h3&gt;</code>
+                        <pre class="makemeabar">    I tend to program in Python.<br aria-hidden="true">    But I also dabble in C/C++</pre>
+                    <code style="color: rgba(255, 255, 255, 0.5);" aria-hidden="true">&lt;/h3&gt;</code>
+                </div>
+    		<!-- </div> -->
+            <!-- <div class="column"> -->
+                <div class="about-me about-me-right">
+                    <code style="color: rgba(255, 255, 255, 0.5);" aria-hidden="true">&lt;h3&gt;</code>
+                        <pre class="makemeabar">    Web Design isn't really my thing.<br aria-hidden="true">    I hope I've done a good enough job!</pre>
+                    <code style="color: rgba(255, 255, 255, 0.5);" aria-hidden="true">&lt;/h3&gt;</code>
+                </div>
+    		<!-- </div> -->
+   		</div>
+        <div class="row">
+            <div class="column">
+                <div style="background-color: rgb(91,206,250);" class="personal-labels"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true">Childhood<br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"></div>
+                <p class="personal">
+                    I was 5 when I first got to experience the world of computers and I have always been interested in how they work. <br aria-hidden="true"><br aria-hidden="true">
+
+                    My first PC had a Pentium 4 CPU @ 3.6GHz, an nVidia 6600GT and 2GB of DDR2 RAM, running on Windows 2000, roughly equivelant to the ones we had in school.<br aria-hidden="true"><br aria-hidden="true">
+
+                    I started creating websites in HTML, CSS and JavaScript when I was 7, up until I was 13, where I then ventured into application programming.
+                    I started off with Java, then moved onto C++ and C. Programming languages at this time were like Linux distros: I would always find myself hopping between a bunch of them.
+                    I did this because I wasn't ready to commit to one single language and wanted to try out a bunch of them.
+                    <br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true">
+                </p>
+            </div>
+            <div class="column">
+                <div style="background-color: rgb(245,169, 184); " class="personal-labels"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true">Programming<br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"></div>
+                <p class="personal">
+                    I never managed to become proficient in any language due to this. Then, and even to this day, I feel there's a barrier preventing me from getting past the basics of a language.
+                    I felt like going to University would help me get past this barrier, and whilst it helped me a little, it didn't provide what I wanted it to do. However I never let this stop me as my passion to program was too great.<br aria-hidden="true"><br aria-hidden="true">
+                    
+                    So whilst I may not be able to do complex programming to meet my goals, I use my basic knowledge to come up with creative solutions to achieve said goals.
+                    I may not have mastered any language, but I have certainly mastered the basics, and more. And with distro-hopping programming languages, it's allowed me versatility.
+                    <br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true">
+                </p>
+            </div>
+            <div class="column">
+                <div style="background-color: white; color: black !important;" class="personal-labels"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true">Linux & Hardware<br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"></div>
+                <p class="personal">
+                    Around the time I was distro hopping programming languages, I also started to dabble in Linux. It wouldn't be until later in life I'd daily drive it for years however. 
+                    I started off with Ubuntu as most people do, and then swapped to Mint which I used for a while and then Manjaro. 
+                    In the present day I almost exclusively use Arch Linux due to it being faster and, despite what everyone leads you to believe, more stable too.<br aria-hidden="true"><br aria-hidden="true">
+
+                    Hardware started to become an interest to me too. In June of 2018, I started a meticilous spreadsheet of specs of all the computers I had ever touched, as well as asking friends for theirs.
+                    I also stored benchmark results and developed my own rudementary benchmarking program to go along with it. As of 2022, there are currently 85 devices listed, with 341 benchmark results.
+                    The first thing I do when I get a new piece of hardware is benchmark and catalogue it.
+                </p>
+            </div>
+            <div class="column">
+                <div style="background-color: rgb(245,169, 184); " class="personal-labels"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true">Gaming<br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"></div>
+                <p class="personal">
+                    I've been a fan of gaming since I first got my Gameboy Advance SP as a child, to the PS2 and then PS3, and finally on to PC. It was on the PC where I started competetive gaming and even became semi-pro, although at the time eSports hadn't taken off, so the prize pool was pennies compared to the prizes these days.
+                    <br aria-hidden="true"><br aria-hidden="true">
+                    It's hard to list my favourite games, especially in order, but the games that would most certainly make the list are Minecraft, Old School RuneScape, Cod4 (Promod), and Terraria.
+                    <br aria-hidden="true"><br aria-hidden="true">
+                    I've always wanted to make a game, however the main barrier I've encoutered has been assests, such as models, textures, audio etc. Free assests are good for placeholders, but free assests often are mismatched and don't suit a game, hence I've never been able to make one.<br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"> <br aria-hidden="true">
+                </p>
+            </div>
+            <div class="column">
+                <div style="background-color: rgb(91,206,250); " class="personal-labels"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true">Personal<br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"><br aria-hidden="true"></div>
+                <p class="personal">
+                    2018 was also the year I came out as trans, the 5th of January to be more specific. On the 30th October 2018 I started HRT, meaning I have been on HRT for <span id="hrt-days"></span> 
+                    <script> 
+                        var hrtDay = new Date("October, 30, 2018");
+                        var today = new Date();
+                        document.getElementById("hrt-days").innerHTML = String(Math.floor((today-hrtDay)/(24*3600*1000)));
+                    </script> days!
+                    I know what you're thinking, "A trans woman doing programming? But that's unheard of!". Yup, I'm a stereotype, I even have the thigh high socks and a blåhaj.<br aria-hidden="true"><br aria-hidden="true">
+
+                    I become homeless in 2021 for a year until I moved to Manchester, UK. I love the city, it's full of so many characters. The only downside to it is GMP, the police force for the area, and the men, but then again, that's the downside pretty much anywhere. <br aria-hidden="true"><br aria-hidden="true">
+
+                    The Gay Village has gone downhill too, as it's become a zoo for straight people to look and gawk at LGBT people. I've been there on a night out where a straight couple got a gay couple kicked out of a gay club for kissing. Where's the logic in that?
+                    <br aria-hidden="true"><br aria-hidden="true">
+                </p>
+            </div>
+        </div>
+    </div>
+    <div id="credits-title"><heading aria-label="credits">// Credits</heading></div>
+    <div class="mainbody">
+        <div class="tech">
+            <div class="tech-used">
+                <h2>Technologies Used</h2>
+                <pre aria-hidden="true" aria-label="jay query"><code>&lt;script&gt;<a href="https://jquery.com/">  jQuery  </a>&lt;/script&gt;</code></pre>
+                <pre aria-hidden="true" aria-label="jay query ui"><code>&lt;script&gt;<a href="https://jqueryui.com/"> jQueryUI </a>&lt;/script&gt;</code></pre>
+                <pre aria-hidden="true" aria-label="p5 dot js"><code>&lt;script&gt;<a href="https://p5js.org/">   p5.js  </a>&lt;/script&gt;</code></pre>
+                <pre aria-hidden="true"><code> &lt;link rel='stylesheet'&gt;<a href="https://www.cdnfonts.com/segoe-ui-4.font"> segoe-ui-4 </a>&lt;/link&gt;                </code></pre>
+                <pre aria-hidden="true"><code>&lt;link rel='stylesheet'&gt;<a href="https://fonts.google.com/specimen/Roboto+Mono"> Roboto Mono </a>&lt;/link&gt;                </code></pre>
+            </div>
+            <div class="code-other">
+                <h2>Code & Other</h2>
+                <a href="https://editor.p5js.org/tom.smith/sketches/HfzOZOwTq">Tom Smith for their particle system.</a><br aria-hidden="true">
+                <a href="http://www.rw-designer.com/user/2879">Tylo222 for their DDS cursor.</a><br aria-hidden="true">
+                <a href="https://www.w3schools.com/howto/howto_css_smooth_scroll.asp">W3Schools for reminding me how to smooth scroll.</a><br aria-hidden="true">
+                <a href="https://github.com/anuraghazra/github-readme-stats">anuraghazra for their readme stats.</a><br aria-hidden="true">
+                <a href="https://tamalsen.dev/">Tamal Sen for the inspiration of this website.</a><br aria-hidden="true">
+                <a href="https://jsfiddle.net/6spj1059/">Rob W for their browser detection code, even if it doesn't 100% work.</a>
+            </div>
+        </div>
+    </div>
+    <div id="about-title"><heading aria-label="footer">// Footer</heading></div>
+    <div class="footer">
+        <!-- TODO: Update footer -->
+        <div class="footer-left">
+            <p id="footer-socials">Socials</p>
+            <hr>
+            <a href="https://github.com/charlottecross1998">Github</a><br aria-hidden="true">
+            <a href="https://github.com/">Meow</a><br aria-hidden="true">
+        </div>
+        <div class="footer-center">
+            <p id="footer-center-color">Pew Pew Pew</p>
+            <hr>
+            pew pew pew
+        </div>
+        <div class="footer-right">
+            <p id="footer-right-color">Site Options</p>
+            <hr>
+            <p id="toggle-styling">Toggle Stylesheet</p>
+            <a href="#top">Return To Top</a>
+        </div>
+    </div>
+
+    <h5 id="javascript-note" aria-hidden="true">Note: The "Activate Javascript" thing has nothing to do with your settings, it's a joke about the "Activate Windows" watermark!</h5>
+    <div class="watermark" aria-hidden="true">
+        Activate JavaScript<br aria-hidden="true">
+        Got to Settings to activate JavaScript.
+    </div>
+</body>	
+</html>
