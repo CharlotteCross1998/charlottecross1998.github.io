@@ -11,8 +11,113 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <link href="https://fonts.cdnfonts.com/css/segoe-ui-4" rel="stylesheet" >
     <link href='https://fonts.googleapis.com/css?family=Roboto Mono' rel='stylesheet' >
-    <link rel="stylesheet" href="stylesheet.css" >
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.min.js" ></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    <script>
+        $(function() 
+        {
+            $('#navbar-home').hover(function() 
+            {
+                $('#navbar-home').css('color', '#fff');
+                //$('#navbar-credits').css('color', '#aaa')
+                $('#navbar-credits').animate({color: '#aaaaaa'},300);
+                $('#navbar-about').animate({color: '#aaaaaa'},300);
+            }, function() 
+            {
+                // on mouseout, reset the background colour
+                $('#navbar-credits').css('color', '#fff');
+                $('#navbar-about').css('color', '#fff');
+            });
+            $('#navbar-about').hover(function() 
+            {
+                $('#navbar-about').css('color', '#fff');
+                $('#navbar-home').animate({color: '#aaaaaa'},300);
+                $('#navbar-credits').animate({color: '#aaaaaa'},300);
+            }, function() 
+            {
+                // on mouseout, reset the background colour
+                $('#navbar-home').css('color', '#fff');
+                $('#navbar-credits').css('color', '#fff');
+            });
+            $('#navbar-credits').hover(function() 
+            {
+                $('#navbar-credits').css('color', '#fff');
+                $('#navbar-home').animate({color: '#aaaaaa'},300);
+                $('#navbar-about').animate({color: '#aaaaaa'},300);
+            }, function() 
+            {
+                // on mouseout, reset the background colour
+                $('#navbar-home').css('color', '#fff');
+                $('#navbar-about').css('color', '#fff');
+            });
+        });
+        //Smooth scroll from https://www.w3schools.com/howto/howto_css_smooth_scroll.asp
+        $(document).ready(function()
+        {
+            //Switch mobile and desktop stylesheet and add/remove p5.js
+            var stylesheet = document.createElement('link');
+            stylesheet.rel = "stylesheet";
+            if('ontouchstart' in window || navigator.msMaxTouchPoints)
+            {
+                stylesheet.href = "mobile-stylesheet.css";
+                stylesheet.type = "text/css";
+                document.getElementById("p5-canvas").remove();
+                console.log("[INFO] Using mobile mode!");
+            }
+            else
+            {
+                stylesheet.href = "desktop-stylesheet.css";
+                stylesheet.type = "text/css";
+                var p5script = document.createElement('script');
+                p5script.src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.min.js";
+                p5script.type = "text/javascript";
+            }
+            document.getElementsByTagName('head')[0].append(stylesheet);
+            document.getElementsByTagName('head')[0].append(p5script);
+          // Add smooth scrolling to all links
+          $("a").on('click', function(event) 
+          {
+            // Make sure this.hash has a value before overriding default behavior
+            if (this.hash !== "") {
+              // Prevent default anchor click behavior
+              event.preventDefault();
+              // Store hash
+              var hash = this.hash;
+              // Using jQuery's animate() method to add smooth page scroll
+              // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area
+              $('html, body').animate(
+              {
+                scrollTop: $(hash).offset().top
+              }, 800, function()
+              {
+                // Add hash (#) to URL when done scrolling (default click behavior)
+                window.location.hash = hash;
+              });
+            } // End if
+          });
+
+            //Toggle styling
+            var styled = false;
+            var stylesheets = Array.from($("head").children('link[rel="stylesheet"]'));
+            $("#toggle-styling").click(function()
+            {
+                console.log("Toggling styles. Style state: " + styled);
+                styled = !styled;
+                if(styled) 
+                {  
+                    stylesheets.forEach(element => {
+                        element.disabled = true;
+                    });
+                }
+                else
+                {
+                    stylesheets.forEach(element => {
+                        element.disabled = false;
+                    });
+                }
+            });
+        });
+    </script>
     <script>
         class Ball
     	    {
@@ -187,93 +292,6 @@
                 pop();
     	    }
     </script>
-    <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-    <script>
-        $(function() 
-        {
-            $('#navbar-home').hover(function() 
-            {
-                $('#navbar-home').css('color', '#fff');
-                //$('#navbar-credits').css('color', '#aaa')
-                $('#navbar-credits').animate({color: '#aaaaaa'},300);
-                $('#navbar-about').animate({color: '#aaaaaa'},300);
-            }, function() 
-            {
-                // on mouseout, reset the background colour
-                $('#navbar-credits').css('color', '#fff');
-                $('#navbar-about').css('color', '#fff');
-            });
-            $('#navbar-about').hover(function() 
-            {
-                $('#navbar-about').css('color', '#fff');
-                $('#navbar-home').animate({color: '#aaaaaa'},300);
-                $('#navbar-credits').animate({color: '#aaaaaa'},300);
-            }, function() 
-            {
-                // on mouseout, reset the background colour
-                $('#navbar-home').css('color', '#fff');
-                $('#navbar-credits').css('color', '#fff');
-            });
-            $('#navbar-credits').hover(function() 
-            {
-                $('#navbar-credits').css('color', '#fff');
-                $('#navbar-home').animate({color: '#aaaaaa'},300);
-                $('#navbar-about').animate({color: '#aaaaaa'},300);
-            }, function() 
-            {
-                // on mouseout, reset the background colour
-                $('#navbar-home').css('color', '#fff');
-                $('#navbar-about').css('color', '#fff');
-            });
-        });
-        //Smooth scroll from https://www.w3schools.com/howto/howto_css_smooth_scroll.asp
-        $(document).ready(function()
-        {
-          // Add smooth scrolling to all links
-          $("a").on('click', function(event) 
-          {
-            // Make sure this.hash has a value before overriding default behavior
-            if (this.hash !== "") {
-              // Prevent default anchor click behavior
-              event.preventDefault();
-              // Store hash
-              var hash = this.hash;
-              // Using jQuery's animate() method to add smooth page scroll
-              // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area
-              $('html, body').animate(
-              {
-                scrollTop: $(hash).offset().top
-              }, 800, function()
-              {
-                // Add hash (#) to URL when done scrolling (default click behavior)
-                window.location.hash = hash;
-              });
-            } // End if
-          });
-
-            //Toggle styling
-            var styled = false;
-            var stylesheets = Array.from($("head").children('link[rel="stylesheet"]'));
-            $("#toggle-styling").click(function()
-            {
-                console.log("Toggling styles. Style state: " + styled);
-                styled = !styled;
-                if(styled) 
-                {  
-                    stylesheets.forEach(element => {
-                        element.disabled = true;
-                    });
-                }
-                else
-                {
-                    stylesheets.forEach(element => {
-                        element.disabled = false;
-                    });
-                }
-            });
-        });
-    </script>
 </head>
 <body>
     <div id="top" aria-label="This website is still in development, if there are any accessibility issues please let me know."></div>
@@ -304,9 +322,10 @@
                 <div id="about-you" style="border: 1px solid white;"></div>
                 <script>
                     var div = document.getElementById("about-you");
+                    var DPR = window.devicePixelRatio;
                     div.innerHTML += "<h3 style=\"color: white; text-align:center;\">About You</h3><hr>"
-                    div.innerHTML += "<span style=\"font-weight: bold;\">Resolution (Screen): </span>" + window.screen.width + "x" + window.screen.height;
-                    div.innerHTML += "<br aria-hidden=\"true\"><span style=\"font-weight: bold;\">Resolution (Page): </span>" + window.innerWidth + "x" + window.innerHeight;
+                    div.innerHTML += "<span style=\"font-weight: bold;\">Resolution (Screen): </span>" + Math.round(window.screen.width*DPR) + "x" + Math.round(window.screen.height*DPR);
+                    div.innerHTML += "<br aria-hidden=\"true\"><span style=\"font-weight: bold;\">Resolution (Page): </span>" + Math.round(window.innerWidth*DPR) + "x" + Math.round(window.innerHeight*DPR);
                     div.innerHTML += "<br aria-hidden=\"true\"><span style=\"font-weight: bold;\">User-Agent: </span>" + window.navigator.userAgent;
                     div.innerHTML += "<br aria-hidden=\"true\"><span style=\"font-weight: bold;\">Referrer: </span>" + document.referrer;
                 </script>
@@ -482,7 +501,7 @@
             </div>
         </div>
     </div>
-    <div id="about-title"><heading aria-label="footer">// Footer</heading></div>
+    <div id="footer-title"><heading aria-label="footer">// Footer</heading></div>
     <div class="footer">
         <!-- TODO: Update footer -->
         <div class="footer-left">

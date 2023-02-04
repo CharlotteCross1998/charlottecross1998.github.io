@@ -291,17 +291,3 @@ a:hover
 	height: inherit;
 	line-height: 125%;
 }
-@media only screen and (max-width: 580px)
-{
-	body
-	{
-		font-size: 0.8em;
-	}
-}
-@media only screen and (max-width: 460px)
-{
-	body
-	{
-		font-size: 0.6em;
-	}
-}
