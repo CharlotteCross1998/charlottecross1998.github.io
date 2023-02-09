@@ -170,7 +170,7 @@ a:hover
 	/* border-radius: 5px; */
 	max-width: 33%;
 }
-#home-title, #about-title, #credits-title
+#home-title, #about-title, #credits-title, #footer-title
 {
 	font-size: 10em;
 	color: #fff;
